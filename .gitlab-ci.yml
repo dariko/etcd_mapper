@@ -1,0 +1,29 @@
+stages:
+-   test
+
+image: docker:latest
+
+variables:
+    IMAGE: ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}
+    DOCKER_PUBLISH_HOST: docker
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+    NO_PROXY: docker,gitlab.prod.postecom.local
+    no_proxy: docker,gitlab.prod.postecom.local
+
+test:
+    stage: test
+    image: python:3.7-slim
+    services:
+    -   name: docker:dind
+    script:
+    -   env
+    -   pip install flake8
+    -   flake8
+    -   echo 'Acquire::http::Proxy "'$http_proxy'";' > /etc/apt/apt.conf.d/99proxy
+    -   cat /etc/apt/apt.conf.d/99proxy
+    -   apt-get update && apt-get install -y gcc
+    -   pip install -r requirements.test.txt
+    -   pip install -r requirements.txt
+    -   pip install .
+    -   unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY; python -m pytest --log-level debug --log-cli-level info -n 4 tests/ --cov etcd_utils/
