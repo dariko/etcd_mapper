@@ -27,3 +27,4 @@ test:
     -   pip install -r requirements.txt
     -   pip install .
     -   unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY; python -m pytest --log-level debug --log-cli-level info -n 4 tests/ --cov etcd_utils/
+    -   codecov
